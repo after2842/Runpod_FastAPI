@@ -542,3 +542,7 @@ def crop(req: CropRequest):
         "num_detections": len(detections),
         "detections": detections,
     }
+
+@app.get("/ping")
+def ping():
+    return {"status": "healthy"}
