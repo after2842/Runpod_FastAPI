@@ -37,6 +37,7 @@ RUN pip install --no-deps \
     huggingface_hub \
     boto3 \
     opencv-python-headless \
+    click \
     polars
 
 # Extra packages commonly needed by ultralytics / open-clip
