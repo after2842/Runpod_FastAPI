@@ -9,7 +9,6 @@ ENV MPLCONFIGDIR=/tmp/matplotlib
 
 WORKDIR /app
 
-# System libs for OpenCV / PIL / general runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     libgl1 \
@@ -18,30 +17,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN python -m pip install --upgrade pip setuptools wheel
 
-# Install Torch first, pinned to your current CUDA 12.4 stack
+
 RUN pip install \
     torch==2.4.1 \
     torchvision==0.19.1 \
     torchaudio==2.4.1 \
     --index-url https://download.pytorch.org/whl/cu124
 
-# Install runtime libs without letting them modify torch
-RUN pip install --no-deps \
+
+RUN pip install \
     fastapi \
-    uvicorn[standard] \
-    ultralytics==8.4.19 \
-    open-clip-torch \
+    uvicorn
+
+RUN pip install \
     pillow \
     numpy \
     requests \
     huggingface_hub \
     boto3 \
     opencv-python-headless \
-    click \
-    polars
-
-# Extra packages commonly needed by ultralytics / open-clip
-RUN pip install --no-deps \
+    polars \
     tqdm \
     pyyaml \
     scipy \
@@ -50,9 +45,22 @@ RUN pip install --no-deps \
     ftfy \
     regex \
     safetensors \
-    timm
+    timm \
+    ultralytics-thop
+
+
+RUN pip install --no-deps \
+    ultralytics==8.4.19 \
+    open-clip-torch
 
 COPY app.py /app/app.py
+
+RUN python - <<'PY'
+import fastapi, uvicorn, h11, starlette, pydantic, anyio
+import boto3, numpy, requests, open_clip
+from ultralytics import YOLO
+print("import smoke test OK")
+PY
 
 EXPOSE 8000
 
